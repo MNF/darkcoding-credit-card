@@ -7,10 +7,12 @@ namespace CreditCardNumberGenerator
     public static class RandomCreditCardNumberGenerator
     {
         /*
-         Copy Kev Hunter's changes August 16, 2009 from from https://kevhunter.wordpress.com/2009/08/16/creating-fake-credit-card-numbers/
+        The latest version can be downloaded from https://github.com/grahamking/darkcoding-credit-card/
+
+         Copy Kev Hunter's changes August 16, 2009 from https://kevhunter.wordpress.com/2009/08/16/creating-fake-credit-card-numbers/
          Include comments from Zoltan siaynoq(http://en.gravatar.com/siaynoq) April 20, 2011 
          Included in GitHub by MNF 31 May 2016.
-         MNF 31 May 2016 Added PrefixAndLength struct and methods to generate random numbers of different types in the same call to GetCreditCardNumbers
+         Added PrefixAndLength struct and methods to generate random numbers of different types in the same call to GetCreditCardNumbers
 
         This is a port of the port of of the Javascript credit card number generator now in C#
         * by Kev Hunter https://kevhunter.wordpress.com
@@ -116,8 +118,7 @@ Example of use:
         /// <param name="prefixAndLengthList"></param>
         /// <param name="howMany"></param>
         /// <returns></returns>
-        public static IEnumerable<string> GetCreditCardNumbers(PrefixAndLength[] prefixAndLengthList,
-                                                         int howMany)
+        public static IEnumerable<string> GetCreditCardNumbers(PrefixAndLength[] prefixAndLengthList, int howMany)
         {
             Random rndGen = new Random();
             return GetCreditCardNumbers(rndGen, prefixAndLengthList, howMany);
@@ -137,7 +138,10 @@ Example of use:
 
             return result;
         }
-
+        public static string GetCreditCardNumber(this Random random, PrefixAndLength[] prefixAndLengthArray)
+        {
+            return random.GetCreditCardNumbers(prefixAndLengthArray, 1).First();
+        }
         /*
       'prefix' is the start of the  CC number as a string, any number
         private of digits   'length' is the length of the CC number to generate.
@@ -188,30 +192,38 @@ Example of use:
             return ccnumber;
         }
 
-  
-        public static IEnumerable<string> GetCreditCardNumbers(string[] prefixList, int length,
-                                                  int howMany)
+        /// <summary>
+        ///  Better to use extension overload with [this Random random] paramenter
+        /// </summary>
+         public static IEnumerable<string> GetCreditCardNumbers(string[] prefixList, int length,  int howMany)
+        {
+            var random = new Random();
+            return GetCreditCardNumbers(random, prefixList, length, howMany);
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="random"></param>
+        /// <param name="prefixList"></param>
+        /// <param name="length"></param>
+        /// <param name="howMany"></param>
+        /// <returns></returns>
+        public static IEnumerable<string> GetCreditCardNumbers(this Random random, string[] prefixList, int length, int howMany)
         {
             var result = new Stack<string>();
-            var random = new Random();
             for (int i = 0; i < howMany; i++)
             {
                 int randomPrefix = random.Next(0, prefixList.Length - 1);
-     
-                if(randomPrefix>1)  //Why??, is it a bug ? it never will select last element
-                {
-                    randomPrefix--;
-                }
- 
+
                 string ccnumber = prefixList[randomPrefix];
- 
+
                 result.Push(CreateFakeCreditCardNumber(random, ccnumber, length));
             }
- 
+
             return result;
         }
- 
- 
+
+
         public static IEnumerable<string> GenerateMasterCardNumbers(int howMany)
         {
             return GetCreditCardNumbers(MASTERCARD_PREFIX_LIST, 16, howMany);
